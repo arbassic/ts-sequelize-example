@@ -1,2 +1,2 @@
-# TYPESCRIPT + SEQUELIZE v5 EXAMPLE
+# TypeScript + Sequelize v5 – Example
 
