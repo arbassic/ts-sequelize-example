@@ -1,14 +1,17 @@
 {
-  "compilerOptions": {
-      "sourceMap": true,
-      "target": "es6",
-      "module": "commonjs",
-      "baseUrl": "./src"
-  },
-  "include": [
-      "src/**/*"
-  ],
-  "exclude": [
-      "node_modules"
-  ]
+    "compilerOptions": {
+        "sourceMap": true,
+        "target": "es6",
+        "module": "commonjs",
+        "baseUrl": "./src",
+        "paths": {
+            "/*": ["*"]
+        }
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
 }

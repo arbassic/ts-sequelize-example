@@ -4,16 +4,15 @@ import { Sequelize } from 'sequelize';
 import * as helmet from 'helmet';
 
 import Config from './db-config';
-import { onlyJson } from './middlewares/only-json';
+import { acceptJsonOnly } from './middlewares/';
 
 const app = express();
-app.use(onlyJson);
+app.use(acceptJsonOnly);
 app.use(helmet());
 app.use(express.json());
 app.listen(3000, () => {
   console.log('App listening on port 3000');
 });
-
 
 const sequelize = new Sequelize(Config);
 
