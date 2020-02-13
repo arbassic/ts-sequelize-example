@@ -1,17 +1,28 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import * as express from 'express';
 import { Request, Response } from 'express';
 import { Sequelize } from 'sequelize';
 import * as helmet from 'helmet';
 import Config from './db-config';
-import { onlyJson } from './middlewares/only-json';
 
 const app = express();
-app.use(onlyJson);
 app.use(helmet());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.listen(3000, () => {
-  console.log('App listening on port 3000');
-});
+
+const onListenClbck = (error) => {
+  if (error && error.code === 'EADDRINUSE') {
+    console.log(`Port  ${process.env.PORT} in use, retrying...`);
+    setTimeout(() => {
+      app.listen(process.env.PORT, onListenClbck);
+    }, 1000);
+  } else {
+    console.log(`App listening on port ${process.env.PORT}`);
+  }
+};
+app.listen(process.env.PORT, onListenClbck);
 
 const sequelize = new Sequelize(Config);
 
