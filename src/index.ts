@@ -2,12 +2,11 @@ import * as express from 'express';
 import { Request, Response } from 'express';
 import { Sequelize } from 'sequelize';
 import * as helmet from 'helmet';
-
 import Config from './db-config';
-import { acceptJsonOnly } from './middlewares/';
+import { onlyJson } from './middlewares/only-json';
 
 const app = express();
-app.use(acceptJsonOnly);
+app.use(onlyJson);
 app.use(helmet());
 app.use(express.json());
 app.listen(3000, () => {
