@@ -1,7 +1,6 @@
 import * as dotenv from 'dotenv';
 const env = dotenv.config();
-if (env.error)
-  throw Error("Need .env file to start the server");
+if (env.error) throw Error("Missing .env file");
 
 import * as express from 'express';
 import { Request, Response } from 'express';
@@ -16,6 +15,7 @@ import { usersRouter } from './routes/users';
 // create express application and
 // configure it with some basic middleware
 const app = express();
+app.set('isProd', process.env.NODE_ENV === 'production');
 app.use(helmet());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -27,16 +27,15 @@ app.use(accessLogger);
 const SequelizeStore = SessionStore(Session.Store);
 const sessionConfig: any = {
   secret: process.env.SESSION_SECRET,
-  store: new SequelizeStore({
-    db
-  }),
+  store: new SequelizeStore({ db }),
+  saveUninitialized: true,
   resave: false,
   cookie: {
     httpOnly: true,
     maxAge: parseInt(process.env.SESSION_MAX_AGE_DAYS) * 24 * 60 * 60 * 1000
   },
 };
-if (process.env.NODE_ENV === 'production') {
+if (app.get('isProd')) {
   app.set('trust proxy', 1);
   sessionConfig.cookie.secure = true;
   sessionConfig.proxy = true;
@@ -64,10 +63,10 @@ app.use((err, req: Request, res: Response, next) => {
   const output: any = {
     message: err.output || 'A server error occured'
   };
-  if (process.env.NODE_ENV != 'production' && res.statusCode > 404) {
+  if (!app.get('isProd') && res.statusCode > 404) {
     output.error = err.message;
   };
-  if (process.env.NODE_ENV != 'production' && res.statusCode > 404) {
+  if (!app.get('isProd') && res.statusCode > 404) {
     output.stack = err.stack;
   }
 
@@ -82,11 +81,15 @@ app.listen(process.env.PORT, () => {
   
   // from now on express app is running
   // capture uncaught errors and unhandled promises
-  process
-    .on('uncaughtException', err => {
-      logger.error('got uncaughtException', err.stack);
-    })
-    .on('unhandledRejection', (reason, promise) => {
-      logger.error('got unhandledRejection', reason, promise);
-    });
+  if (app.get('isProd')) {
+    process
+      .on('uncaughtException', err => {
+        logger.error('got uncaughtException', err.stack);
+      })
+      .on('unhandledRejection', (reason, promise) => {
+        logger.error('got unhandledRejection', reason, promise);
+      });
+  }
 });
+
+export default app;

@@ -3,8 +3,11 @@ import { UserPrivilege } from './UserPrivilege';
 import { ActivityLog } from './ActivityLog';
 import { onSyncedCallbacks } from '../db';
 import * as bcrypt from 'bcrypt';
+import app from 'server';
 
 const addSeed = async () => {
+  app.emit('app synced');
+
   const passwordHash = await bcrypt.hash('abc', 10);
   const user: User = await User.create({
     name: 'Superadmin 1',
@@ -34,7 +37,7 @@ const addSeed = async () => {
     params: '1,2,3'
   });
 
-  console.log('seed created', user.name);
+  app.emit('app launched', user);
   return user;
 };
 

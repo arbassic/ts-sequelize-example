@@ -1,4 +1,4 @@
-import { Router, Request } from "express";
+import { Router, Request, Response } from "express";
 import * as asyncHandler from "express-async-handler";
 import { User } from "models/User";
 
@@ -11,20 +11,29 @@ usersRouter
   }));
 
 usersRouter.get('/:userId', asyncHandler( async (req, res) => {
+
+  // basic validation
   const userId = parseInt(req.params.userId);
   const password = req.query.password;
-  if (!userId || !password) {
-    throw Error("No user id or password");
-  }
+  if (!userId || !password)
+    return sendError(res, "No user id or password");
+  
+  // find the user, associate privileges 
   const user: User = await User.findByPk(userId, { include: ['privileges'] });
-  if (!user) {
-    throw Error("User not found");
-  }
+  if (!user)
+    return sendError(res, "User not found");
+
+  // check password asynchronously
   const passwordMatch = await user.checkPassword(password);
-  if (!passwordMatch) {
-    throw Error("Password doesn't match");
-  }
+  
+  if (!passwordMatch)
+    return sendError(res, "Password doesn't match");
+  
   res.status(200).json(user);
 }));
+
+const sendError = (res: Response, message: string) => {
+  res.status(404).json({ message });
+};
 
 export { usersRouter };
