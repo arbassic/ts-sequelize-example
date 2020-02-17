@@ -1,13 +1,14 @@
-import { User } from "./User";
-import { UserPrivilege } from "./UserPrivilege";
-import { ActivityLog } from "./ActivityLog";
-import { onSyncedCallbacks } from "../db";
+import { User } from './User';
+import { UserPrivilege } from './UserPrivilege';
+import { ActivityLog } from './ActivityLog';
+import { onSyncedCallbacks } from '../db';
+import * as bcrypt from 'bcrypt';
 
 const addSeed = async () => {
-
+  const passwordHash = await bcrypt.hash('abc', 10);
   const user: User = await User.create({
     name: 'Superadmin 1',
-    passwordHash: 'abcdefghijklmnoprstuwxyz'
+    passwordHash, 
   });
 
   await UserPrivilege.create({

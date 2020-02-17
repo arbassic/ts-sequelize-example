@@ -1,6 +1,7 @@
 import { db } from "../db";
 import { Model, DataTypes } from "sequelize";
 import { UserPrivilege } from "./UserPrivilege";
+import * as bcrypt from 'bcrypt';
 
 
 export class User extends Model<User> {
@@ -13,6 +14,10 @@ export class User extends Model<User> {
   public readonly updatedAt!: Date;
 
   public readonly privileges: UserPrivilege[];
+
+  public async checkPassword(password: string) {
+    return await bcrypt.compare(password, this.passwordHash);
+  }
 }
 
 User.init(

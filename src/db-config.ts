@@ -18,7 +18,7 @@ const Config: Options = {
     // timestamps: false
   },
   // benchmark: false,
-  // logging: false
+  // logging: msg => logger.debug(msg)
 };
 
 export default Config;

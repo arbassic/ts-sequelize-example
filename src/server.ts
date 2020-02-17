@@ -24,10 +24,23 @@ app.get('/', (req, res) => {
 
 // --- temporary test-endpoint
 import { User } from './models/User';
-app.get('/users/:userId', async (req, res) => {
-  const user = await User.findByPk(1, { include: ['privileges'] });
+import { asyncHandler } from './middlewares/async-handler';
+app.get('/users/:userId', asyncHandler( async (req, res) => {
+  const userId = parseInt(req.params.userId);
+  const password = req.query.password;
+  if (!userId || !password) {
+    throw Error("No user id or password");
+  }
+  const user: User = await User.findByPk(userId, { include: ['privileges'] });
+  // if (!user) {
+  //   throw Error("User not found");
+  // }
+  // const passwordMatch = await user.checkPassword(password);
+  // if (!passwordMatch) {
+  //   throw Error("Password doesn't match");
+  // }
   res.status(200).json(user);
-});
+}));
 // --- temporary test-endpoint
 
 
@@ -65,9 +78,9 @@ app.listen(process.env.PORT, () => {
   // capture uncaught errors and unhandled promises
   process
     .on('uncaughtException', err => {
-      logger.error('uncaughtException', err.stack);
+      logger.error('got uncaughtException', err.stack);
     })
     .on('unhandledRejection', (reason, promise) => {
-      logger.error('unhandledRejection', reason, promise);
+      logger.error('got unhandledRejection', reason, promise);
     });
 });
