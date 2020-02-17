@@ -2,10 +2,12 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 import * as express from 'express';
 import { Request, Response } from 'express';
+import * as Session from 'express-session';
+import * as SessionStore from 'connect-session-sequelize';
 import * as helmet from 'helmet';
 import { accessLogger, logger } from './logger';
+import { db } from './db';
 import './models';
-
 
 // create express application and
 // configure it with some basic middleware
@@ -17,9 +19,34 @@ app.use(express.json());
 // use morgan access logger
 app.use(accessLogger);
 
+// configure session store and middleware
+const SequelizeStore = SessionStore(Session.Store);
+const sessionConfig: any = {
+  secret: process.env.SESSION_SECRET,
+  store: new SequelizeStore({
+    db
+  }),
+  resave: false,
+  cookie: {
+    httpOnly: true,
+    maxAge: parseInt(process.env.SESSION_MAX_AGE_DAYS) * 24 * 60 * 60 * 1000
+  },
+};
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+  sessionConfig.cookie.secure = true;
+  sessionConfig.proxy = true;
+}
+app.use(Session(sessionConfig));
+
 // configure routes
 app.get('/', (req, res) => {
-  res.status(200).json({ message: 'Welcome!', body: req.body, query: req.query, headers: req.headers["content-type"] });
+  res.status(200).json({
+    message: 'Welcome!',
+    body: req.body,
+    query: req.query,
+    headers: req.headers['content-type']
+  });
 });
 
 // --- temporary test-endpoint
