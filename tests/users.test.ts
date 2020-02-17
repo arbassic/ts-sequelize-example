@@ -17,6 +17,7 @@ before((done) => {
 
 describe('Users', () => {
   describe('GET /', () => {
+    
     it('should get all user records', done => {
       chai
         .request(app)
@@ -27,8 +28,7 @@ describe('Users', () => {
           done();
         });
     });
-   
-    // Test to get single student record
+
     it('should get a single user record with a password', done => {
       const id = 1;
       chai
@@ -41,18 +41,25 @@ describe('Users', () => {
         });
     });
 
-    // Test to get single student record
-    it('should not get a single student record', done => {
-      const id = 5;
-      chai
-        .request(app)
-        .get(`/users/${id}`)
-        .end((err, res) => {
-          res.should.have.status(404);
-          done();
-        });
+    it('should not get a single user record', done => {
+      const unsupportedIds = [153248636, 'nqo0e9e5a', -1, 0];
+      Promise.all(
+        unsupportedIds.map(id => {
+          return new Promise((resolve, reject) => {
+            chai
+              .request(app)
+              .get(`/users/${id}`)
+              .then((res) => {
+                res.should.have.status(404);
+                resolve();
+              })
+              .catch((error) => {
+                reject(error);
+              });
+          });
+        })
+      ).then(() => done());
     });
-    
     
   });
 });
