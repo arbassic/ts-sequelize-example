@@ -2,6 +2,7 @@
 import * as morgan from 'morgan';
 import * as winston from 'winston';
 import * as DailyRotateFile from 'winston-daily-rotate-file';
+import env from 'env';
 const { format } = winston;
 
 const loggerForMorgan = winston.createLogger({
@@ -22,7 +23,7 @@ export const accessLogger = morgan('combined', { stream: winstonStream });
 
 // runtime and errors logger
 export const logger = winston.createLogger({
-  level: 'info',
+  level: 'debug',
   format: format.combine(
     format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     format.json()
@@ -34,12 +35,8 @@ export const logger = winston.createLogger({
   ]
 });
 
-
-
-// If we're not in production then log to the `console` with the format:
-// `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
-// 
-if (process.env.NODE_ENV !== 'production') {
+// in development mode put all messages to console 
+if (env.isDev) {
   logger.add(new winston.transports.Console({
     format: format.prettyPrint({
       depth: 1,

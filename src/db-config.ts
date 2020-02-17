@@ -1,4 +1,5 @@
 import { Dialect, Options } from "sequelize";
+import { logger } from "logger";
 
 const Config: Options = {
   database: "sequelize_test_db",
@@ -18,7 +19,7 @@ const Config: Options = {
     // timestamps: false
   },
   // benchmark: false,
-  // logging: msg => logger.debug(msg)
+  logging: msg => logger.debug(msg)
 };
 
 export default Config;

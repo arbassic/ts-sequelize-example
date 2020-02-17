@@ -18,47 +18,39 @@ before((done) => {
 describe('Users', () => {
   describe('GET /', () => {
     
-    it('should get all user records', done => {
-      chai
-        .request(app)
+    const agent = chai.request.agent(app);
+
+    it('should get all user records', () => {
+      return agent
         .get('/users')
-        .end((err, res) => {
+        .then(res => {
           res.should.have.status(200);
           res.body.should.be.a('array');
-          done();
-        });
+        })
     });
 
-    it('should get a single user record with a password', done => {
+    it('should get a single user record with a password', () => {
       const id = 1;
-      chai
-        .request(app)
-        .get(`/users/${id}?password=abc`)
-        .end((err, res) => {
+      return agent
+        .get(`/users/${id}`)
+        .query({
+          password: 'abc'
+        })
+        .then(res => {
           res.should.have.status(200);
           res.body.should.be.a('object');
-          done();
         });
     });
 
-    it('should not get a single user record', done => {
+    it('should not get a single user record', () => {
       const unsupportedIds = [153248636, 'nqo0e9e5a', -1, 0];
-      Promise.all(
-        unsupportedIds.map(id => {
-          return new Promise((resolve, reject) => {
-            chai
-              .request(app)
-              .get(`/users/${id}`)
-              .then((res) => {
-                res.should.have.status(404);
-                resolve();
-              })
-              .catch((error) => {
-                reject(error);
-              });
-          });
-        })
-      ).then(() => done());
+      return Promise.all(
+        unsupportedIds.map(id =>
+          agent.get(`/users/${id}`).then(res => {
+            res.should.have.status(404);
+          })
+        )
+      );
     });
     
   });
