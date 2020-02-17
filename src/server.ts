@@ -1,5 +1,8 @@
 import * as dotenv from 'dotenv';
-dotenv.config();
+const env = dotenv.config();
+if (env.error)
+  throw Error("Need .env file to start the server");
+
 import * as express from 'express';
 import { Request, Response } from 'express';
 import * as Session from 'express-session';
@@ -8,6 +11,7 @@ import * as helmet from 'helmet';
 import { accessLogger, logger } from './logger';
 import { db } from './db';
 import './models';
+import { usersRouter } from './routes/users';
 
 // create express application and
 // configure it with some basic middleware
@@ -40,36 +44,11 @@ if (process.env.NODE_ENV === 'production') {
 app.use(Session(sessionConfig));
 
 // configure routes
-app.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Welcome!',
-    body: req.body,
-    query: req.query,
-    headers: req.headers['content-type']
-  });
+app.all('/', (req, res) => {
+  res.status(200).json({ message: 'Server is running!' });
 });
 
-// --- temporary test-endpoint
-import { User } from './models/User';
-import { asyncHandler } from './middlewares/async-handler';
-app.get('/users/:userId', asyncHandler( async (req, res) => {
-  const userId = parseInt(req.params.userId);
-  const password = req.query.password;
-  if (!userId || !password) {
-    throw Error("No user id or password");
-  }
-  const user: User = await User.findByPk(userId, { include: ['privileges'] });
-  // if (!user) {
-  //   throw Error("User not found");
-  // }
-  // const passwordMatch = await user.checkPassword(password);
-  // if (!passwordMatch) {
-  //   throw Error("Password doesn't match");
-  // }
-  res.status(200).json(user);
-}));
-// --- temporary test-endpoint
-
+app.use('/users', usersRouter);
 
 // configure the "Not found" response 
 // and final error handling
