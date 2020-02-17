@@ -1,13 +1,12 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
+import { db } from './db';
 import * as express from 'express';
 import { Request, Response } from 'express';
-import { Sequelize } from 'sequelize';
 import * as helmet from 'helmet';
-import Config from './db-config';
 import { accessLogger, logger } from './logger';
-
+import './models';
 
 const app = express();
 app.use(helmet());
@@ -16,7 +15,7 @@ app.use(express.json());
 app.use(accessLogger);
   
 app.listen(process.env.PORT, () => {
-  console.log(`App listening on port ${process.env.PORT}`);
+  logger.info(`App listening on port ${process.env.PORT}`);
   
   // from now on express app is running
   // capture uncaught errors and unhandled promises
@@ -29,16 +28,15 @@ app.listen(process.env.PORT, () => {
     });
 });
 
-const sequelize = new Sequelize(Config);
 
-sequelize
-  .sync({ force: true })
-  .then(results => {
-    console.log('sequelize synced');
-  })
-  .catch(error => {
-    console.error('error', error);
-  });
+(async function () {
+  try {
+    await db.sync({ force: true });
+    logger.info('Sequelize synced');
+  } catch (error) {
+    logger.error('Error during Sequelize syncing', error);
+  }
+})();
 
 
 // configure routes
