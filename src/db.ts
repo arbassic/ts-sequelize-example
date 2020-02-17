@@ -1,6 +1,7 @@
 import { Sequelize } from 'sequelize';
 import Config from './db-config';
 import { logger } from './logger';
+import app from 'server';
 
 // create an instance of Sequelize that is available for other modules
 export const db = new Sequelize(Config);
@@ -18,6 +19,7 @@ export const onSyncedCallbacks = [];
     logger.info('Sequelize synced');
     onSyncedCallbacks.forEach(clbck => clbck());
     onSyncedCallbacks.length = 0;
+    app.emit('app synced');
   } catch (error) {
     logger.error('Error during Sequelize syncing', error);
   }

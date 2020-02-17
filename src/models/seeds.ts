@@ -6,8 +6,7 @@ import * as bcrypt from 'bcrypt';
 import app from 'server';
 
 const addSeed = async () => {
-  app.emit('app synced');
-
+  
   const passwordHash = await bcrypt.hash('abc', 10);
   const user: User = await User.create({
     name: 'Superadmin 1',
