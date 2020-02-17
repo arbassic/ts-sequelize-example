@@ -52,8 +52,8 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req: Request, res: Response, next) => {
-  logger.error({ path: req.path, message: err.message, stack: err.stack });
   res.status(res.statusCode >= 400 ? res.statusCode : 500);
+  logger.error({ path: req.path, output: err.output, message: err.message, stack: err.stack, statusCode: res.statusCode });
 
   const output: any = {
     message: err.output || 'A server error occured'
