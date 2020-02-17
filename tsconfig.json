@@ -7,9 +7,9 @@
         "target": "es6",
         "baseUrl": "./src",
         "paths": {
-            "*": ["*", "./src/*", "/*", "/src/*"],
+            "*": ["*", "/*", "/src/*"],
         },
-        "outDir": "dist",
+        "outDir": "dist"
     },
     "include": [
         "./src/**/*"
