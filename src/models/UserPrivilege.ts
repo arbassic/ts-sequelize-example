@@ -7,6 +7,12 @@ export class UserPrivilege extends Model<UserPrivilege> {
   public name!: string;
 }
 
+export const UserPrivilegeTypes = {
+  superadmin: 'superadmin',
+  manager: 'manager',
+  regular: 'regular',
+};
+
 UserPrivilege.init(
   {
     id: {

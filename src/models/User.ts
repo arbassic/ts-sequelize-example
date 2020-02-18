@@ -2,6 +2,7 @@ import { db } from "../db";
 import { Model, DataTypes } from "sequelize";
 import { UserPrivilege } from "./UserPrivilege";
 import * as bcrypt from 'bcrypt';
+import { Company } from "./Company";
 
 
 export class User extends Model<User> {
@@ -9,11 +10,13 @@ export class User extends Model<User> {
   public name!: string;
   public status!: string;
   public passwordHash!: string;
+  public companyId?: number;
   
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
   public readonly privileges: UserPrivilege[];
+  public readonly company: Company;
 
   public async checkPassword(password: string) {
     return await bcrypt.compare(password, this.passwordHash);
@@ -38,6 +41,10 @@ User.init(
     status: {
       type: DataTypes.STRING(16),
       defaultValue: 'active'
+    },
+    companyId: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: true
     }
   },
   {

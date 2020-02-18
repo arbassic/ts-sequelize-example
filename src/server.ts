@@ -7,7 +7,7 @@ import * as SessionStore from 'connect-session-sequelize';
 import * as helmet from 'helmet';
 import { accessLogger, logger } from './logger';
 import { db } from './db';
-import './models';
+import './models/associations';
 import { usersRouter } from './routes/users';
 import * as swaggerUi from 'swagger-ui-express';
 
@@ -62,20 +62,22 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req: Request, res: Response, next) => {
-  res.status(res.statusCode >= 400 ? res.statusCode : 500);
+  if (!res.headersSent) {
+    res.status(res.statusCode >= 400 ? res.statusCode : 500);
+    const output: any = {
+      message: err.output || 'A server error occured'
+    };
+    if (!env.isProd && res.statusCode > 404) {
+      output.error = err.message;
+    };
+    if (!env.isProd && res.statusCode > 404) {
+      output.stack = err.stack;
+    }
+
+    res.json(output);
+  }
   logger.error({ path: req.path, output: err.output, message: err.message, stack: err.stack, statusCode: res.statusCode });
 
-  const output: any = {
-    message: err.output || 'A server error occured'
-  };
-  if (!env.isProd && res.statusCode > 404) {
-    output.error = err.message;
-  };
-  if (!env.isProd && res.statusCode > 404) {
-    output.stack = err.stack;
-  }
-
-  res.json(output);
 });
 
 

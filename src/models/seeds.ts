@@ -1,43 +1,56 @@
 import { User } from './User';
-import { UserPrivilege } from './UserPrivilege';
+import { UserPrivilege, UserPrivilegeTypes } from './UserPrivilege';
 import { ActivityLog } from './ActivityLog';
 import { onSyncedCallbacks } from '../db';
 import * as bcrypt from 'bcrypt';
 import app from 'server';
+import { Company } from './Company';
 
 const addSeed = async () => {
-  
-  const passwordHash = await bcrypt.hash('abc', 10);
-  const user: User = await User.create({
-    name: 'Superadmin 1',
-    passwordHash, 
+
+  // create superadmin with password and no parent-company
+  let passwordHash = await bcrypt.hash('abc', 10);
+  const superadmin: User = await User.create({
+    name: 'Superadmin',
+    passwordHash
   });
 
   await UserPrivilege.create({
-    userId: user.id,
-    name: 'superadmin'
-  });
-  await UserPrivilege.create({
-    userId: user.id,
-    name: 'finance'
-  });
-  await UserPrivilege.create({
-    userId: user.id,
-    name: 'manager'
-  });
-  await UserPrivilege.create({
-    userId: user.id,
-    name: 'worker'
+    userId: superadmin.id,
+    name: UserPrivilegeTypes.superadmin
   });
 
-  await ActivityLog.create({
-    userId: user.id,
-    activityType: 'info',
-    params: '1,2,3'
+
+  // create sample company and its sample users - owner and a regular worker
+  const company: Company = await Company.create({
+    name: 'Brave Jackals'
   });
 
-  app.emit('app launched', user);
-  return user;
+  passwordHash = await bcrypt.hash('manager-pass', 10);
+  const owner: User = await User.create({
+    name: 'Owner',
+    passwordHash,
+    companyId: company.id
+  });
+
+  await UserPrivilege.create({
+    userId: owner.id,
+    name: UserPrivilegeTypes.manager
+  });
+
+  passwordHash = await bcrypt.hash('worker-pass', 10);
+  const worker: User = await User.create({
+    name: 'Worker',
+    passwordHash,
+    companyId: company.id
+  });
+
+  await UserPrivilege.create({
+    userId: worker.id,
+    name: UserPrivilegeTypes.regular // this shouldn't be necessary
+  });
+
+  app.emit('app launched');
 };
 
 onSyncedCallbacks.push(addSeed);

@@ -23,7 +23,7 @@ export const accessLogger = morgan('combined', { stream: winstonStream });
 
 // runtime and errors logger
 export const logger = winston.createLogger({
-  level: env.isDev ? 'debug' : 'info',
+  level: env.isProd ? 'info' : 'debug',
   format: format.combine(
     format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     format.json()
