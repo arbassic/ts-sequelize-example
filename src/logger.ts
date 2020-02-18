@@ -23,7 +23,7 @@ export const accessLogger = morgan('combined', { stream: winstonStream });
 
 // runtime and errors logger
 export const logger = winston.createLogger({
-  level: 'debug',
+  level: env.isDev ? 'debug' : 'info',
   format: format.combine(
     format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     format.json()
@@ -36,11 +36,13 @@ export const logger = winston.createLogger({
 });
 
 // in development mode put all messages to console 
-if (env.isDev) {
+if (!env.isTest) {
   logger.add(new winston.transports.Console({
-    format: format.prettyPrint({
-      depth: 1,
-      colorize: true
-    })
+    format: format.combine(
+      format.prettyPrint({
+        depth: 1,
+        colorize: true
+      })
+    )
   }));
 }

@@ -7,7 +7,7 @@ const env = {
   PORT: process.env.PORT,
   isProd: process.env.NODE_ENV == 'production',
   isTest: process.env.NODE_ENV == 'test',
-  isDev: process.env.NODE_ENV == 'development',
+  isDev: !process.env.NODE_ENV || process.env.NODE_ENV == 'development',
 };
 
 export default env;
