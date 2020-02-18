@@ -6,16 +6,15 @@ chai.use(chaiHttp);
 chai.should();
 
 const expect = chai.expect;
-const assert = chai.assert;
 
 
-// const app = 'http://localhost:3000';
-import app from '../src/server';
-before((done) => {
-  app.on('app launched', (user: any) => {
-    done();
-  });
-});
+const app = 'http://localhost:3000';
+// import app from '../src/server';
+// before((done) => {
+//   app.on('app launched', (user: any) => {
+//     done();
+//   });
+// });
 
 describe('Users', () => {
 
@@ -26,9 +25,8 @@ describe('Users', () => {
       agent
         .post(`/users/${userId}/login`)
         .query({ password });
-    let sessionUserId = -1;
     
-    it('should not be allowed to read user data', () => {
+    it('should be forbidden to read user data publicly', () => {
       return agent
         .get(`/users/1`)
         .query({
@@ -39,7 +37,22 @@ describe('Users', () => {
         });
     });
 
-    it('should reject login attempt due incorrect password', () => {
+    it('should be forbidden to create new user data publicly', () =>
+      agent.post(`/users`).then(res => {
+        res.should.have.property('status').to.be.above(400);
+      }));
+    
+    it('should be forbidden to edit user data publicly', () =>
+      agent.put(`/users/1`).then(res => {
+        res.should.have.property('status').to.be.above(400);
+      }));
+    
+    it('should be forbidden to delete an user publicly', () =>
+      agent.delete(`/users/1`).then(res => {
+        res.should.have.property('status').to.be.above(400);
+      }));
+
+    it('should be forbidden to login with not valid credentials', () => {
       const incorrectCredentials = [
         { userId: -1, password: 'pjk2l4gm8_broken' },
         { userId: 1, password: '' },
@@ -67,7 +80,7 @@ describe('Users', () => {
         .query({ password });
     let sessionUserId = -1;
 
-    it('should login', () => {
+    it('should approve correct credentials', () => {
       return loginAttempt(1, 'abc')
         .then(res => {
           res.should.have.status(200);
@@ -76,7 +89,7 @@ describe('Users', () => {
         });
     });
 
-    it('should get own data', () => {
+    it('should be allowed to get own data', () => {
       return agent
         .get(`/users/${sessionUserId}`)
         .then(res => {
@@ -86,7 +99,17 @@ describe('Users', () => {
         });
     });
 
-    it('should get of any user', () => {
+    it('should be allowed to get own data through /users/me', () => {
+      return agent
+        .get(`/users/me`)
+        .then(res => {
+          res.should.have.status(200);
+          expect(res.body).to.have.property('id').that.is.a('number');
+          expect(res.body.id).to.be.equal(sessionUserId);
+        });
+    });
+
+    it('should be allowed to get any user data', () => {
       return agent
         .get(`/users/2`)
         .then(res => {
@@ -116,7 +139,7 @@ describe('Users', () => {
         });
     });
 
-    it('should login', () => {
+    it('should approve correct credentials', () => {
       return loginAttempt(2, 'manager-pass')
         .then(res => {
           res.should.have.status(200);
@@ -125,7 +148,7 @@ describe('Users', () => {
         });
     });
 
-    it('should access own data', () => {
+    it('should be allowed to access own data', () => {
       return agent
         .get(`/users/${sessionUserId}`)
         .then(res => {
@@ -135,7 +158,7 @@ describe('Users', () => {
         });
     });
 
-    it('should access same company worker data', () => {
+    it('should be allowed to access same company worker data', () => {
       return agent
         .get(`/users/3`)
         .then(res => {
@@ -145,7 +168,22 @@ describe('Users', () => {
         });
     });
 
-    it('should reject accessing data of other company`s user', () => {
+    it('should be allowed to create new user', () =>
+      agent.post(`/users`).then(res => {
+        res.should.have.property('status').to.be.equal(200);
+      }));
+    
+    it('should be allowed to edit user data', () =>
+      agent.put(`/users/3`).then(res => {
+        res.should.have.property('status').to.be.equal(200);
+      }));
+    
+    it('should be allowed to delete an user', () =>
+      agent.delete(`/users/3`).then(res => {
+        res.should.have.property('status').to.be.equal(200);
+      }));
+
+    it('should be forbidden to access data of other company`s user', () => {
       return agent
         .get(`/users/1`)
         .then(res => {
@@ -174,7 +212,7 @@ describe('Users', () => {
         });
     });
 
-    it('should login', () => {
+    it('should approve correct credentials', () => {
       return loginAttempt(3, 'regular-pass')
         .then(res => {
           res.should.have.status(200);
@@ -183,7 +221,7 @@ describe('Users', () => {
         });
     });
 
-    it('should access own data', () => {
+    it('should be allowed to access own data', () => {
       return agent
         .get(`/users/${sessionUserId}`)
         .then(res => {
@@ -193,7 +231,7 @@ describe('Users', () => {
         });
     });
 
-    it('should access same company worker data', () => {
+    it('should be allowed to access same company worker data', () => {
       return agent
         .get(`/users/2`)
         .then(res => {
@@ -203,7 +241,7 @@ describe('Users', () => {
         });
     });
 
-    it('should reject from editing other workers data', () => {
+    it('should be forbidden to edit other workers data', () => {
       return agent
         .put(`/users/2`)
         .send({
@@ -214,7 +252,7 @@ describe('Users', () => {
         });
     });
 
-    it('should reject accessing data of other company`s user', () => {
+    it('should be forbidden to access data of other company`s user', () => {
       return agent
         .get(`/users/1`)
         .then(res => {

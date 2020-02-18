@@ -4,7 +4,7 @@ import { User } from "models/User";
 import { checkAuthLevel, checkAuthParamMatch } from "middlewares/check-auth";
 import { UserPrivilegeTypes } from "models/UserPrivilege";
 import env from "env";
-import { checkAuthUserSameCompany } from "middlewares/check-auth-users";
+import { checkAuthUserSameCompany, checkAuthBasic } from "middlewares/check-auth-users";
 
 const usersRouter = Router();
 
@@ -46,42 +46,81 @@ usersRouter
 
 const getUserById = asyncHandler(async (req, res) => {
 
-  // basic validation
   const userId = parseInt(req.params.userId);
+  if (!userId)
+    return sendError(res, "Unreadable user id param", 404);
 
   // find the user, associate privileges 
   const user: User = await User.findByPk(userId, { include: ['privileges', 'company'] });
+
   if (!user)
     return sendError(res, "User not found", 404);
 
   res.status(200).json(user);
-
 });
+
 
 // each user of a company can access data about co-workers
 usersRouter.get(
+  '/me',
+  checkAuthBasic,
+  (req, res, next) => {
+    req.params.userId = req.session.userId;
+    next();
+  },
+  getUserById
+);
+
+usersRouter.get(
   '/:userId',
   checkAuthUserSameCompany,
-  getUserById);
+  getUserById
+);
+
+
 
 // each user can edit its own data
+const editUser = (req, res) => {
+  // TODO
+  res.status(200).json(req.body);
+};
+// each user can edit its own data
 usersRouter.put(
-  '/:userId',
+  '/me',
   checkAuthParamMatch('userId'),
-  (req, res) => {
-    // TODO
-    res.status(200).json(req.body);
-  });
-
+  editUser
+);
 // manager can edit user data within the same company
 usersRouter.put(
   '/:userId',
   checkAuthLevel(UserPrivilegeTypes.manager),
   checkAuthUserSameCompany,
-  (req, res) => {
-    // TODO
-    res.status(200).json(req.body);
-  });
+  editUser
+);
+
+
+// only managers can create new users
+const createUser = (req, res) => {
+  // TODO
+  res.status(200).json(req.body);
+};
+usersRouter.post(
+  '/',
+  checkAuthLevel(UserPrivilegeTypes.manager),
+  createUser
+);
+
+
+const deleteUser = (req, res) => {
+  // TODO
+  res.status(200).json(req.body);
+};
+// only managers can delete users
+usersRouter.delete(
+  '/:userId',
+  checkAuthLevel(UserPrivilegeTypes.manager),
+  checkAuthUserSameCompany,
+  deleteUser);
 
 
 const sendError = (res: Response, message: string, statusCode: number = 404) => {

@@ -1,5 +1,5 @@
 import asyncHandler = require("express-async-handler");
-import { NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { UserPrivilegeTypes } from "models/UserPrivilege";
 import { User } from "models/User";
 import env from "env";
@@ -54,4 +54,13 @@ const checkAuthUserSameCompany = asyncHandler(async (req, res, next: NextFunctio
   next();
 });
 
-export { checkAuthUserSameCompany };
+const checkAuthBasic = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.session || !req.sessionID || !req.session.privileges || !req.session.userId) {
+    res.status(401).json({ message: 'Unauthorized' });
+    return;
+  }
+  next();
+};
+
+
+export { checkAuthUserSameCompany, checkAuthBasic };
