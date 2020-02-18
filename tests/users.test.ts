@@ -1,14 +1,12 @@
+import env from '../src/env';
 import 'mocha';
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
-
 chai.use(chaiHttp);
 chai.should();
 
-const expect = chai.expect;
 
-
-const app = 'http://localhost:3000';
+const app = `http://localhost:${env.PORT}`;
 // import app from '../src/server';
 // before((done) => {
 //   app.on('app launched', (user: any) => {
@@ -16,6 +14,7 @@ const app = 'http://localhost:3000';
 //   });
 // });
 
+const expect = chai.expect;
 describe('Users', () => {
 
   describe('GET & POST login – common cases', () => {
