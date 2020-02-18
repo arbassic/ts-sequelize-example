@@ -1,4 +1,5 @@
 import env from 'env';
+import * as fs from 'fs';
 import * as express from 'express';
 import { Request, Response } from 'express';
 import * as Session from 'express-session';
@@ -8,6 +9,7 @@ import { accessLogger, logger } from './logger';
 import { db } from './db';
 import './models';
 import { usersRouter } from './routes/users';
+import * as swaggerUi from 'swagger-ui-express';
 
 // create express application and
 // configure it with some basic middleware
@@ -38,11 +40,18 @@ if (env.isProd) {
 }
 app.use(Session(sessionConfig));
 
-// configure routes
+// routes
+// hello world
 app.all('/', (req, res) => {
   res.status(200).json({ message: 'Server is running!' });
 });
 
+// configure swagger
+app.use('/api-docs', swaggerUi.serve);
+const swaggerDocument = JSON.parse(fs.readFileSync(__dirname + '/../swagger.json', 'utf8'));
+app.get('/api-docs', swaggerUi.setup(swaggerDocument, { explorer: true }));
+
+// configure sub-routes
 app.use('/users', usersRouter);
 
 // configure the "Not found" response 
