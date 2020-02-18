@@ -31,22 +31,22 @@ export const checkAuthLevel = (level = 'any') => (req: Request, res: Response, n
 
   // authorization by session[key] vs. req.params[key] verification
   export const checkAuthParamMatch = 
-    (paramKeyInSession: string, paramKeyInRequest: string) => (req: Request, res: Response, next: NextFunction) => {
+    (key: string) => (req: Request, res: Response, next: NextFunction) => {
 
-      if (!req.session || !req.session.privileges || !req.session[paramKeyInSession]) {
+      if (!key) {
+        throw Error(`Got empty key`);
+      }
+
+      if (!req.session || !req.session.privileges || !req.session[key]) {
         res.status(401).json({ message: 'Unauthorized' });
         return;
       }
 
-      if (!paramKeyInRequest) {
-        throw Error(`Got empty paramKeyInRequest`);
-      }
-      
       let authed = req.session.privileges.includes(UserPrivilegeTypes.superadmin);
       // required value
-      const paramValue: string = req.params[paramKeyInRequest];
+      const paramValue: string = req.params[key];
       // actual value in user session
-      const sessionValue: string | string[] = req.session[paramKeyInSession];
+      const sessionValue: string | string[] = req.session[key];
       if (!authed) {
         if (Array.isArray(sessionValue)) {
           authed = sessionValue.includes(paramValue);

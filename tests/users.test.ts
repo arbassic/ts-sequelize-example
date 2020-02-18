@@ -155,4 +155,72 @@ describe('Users', () => {
   });
   
 
+
+
+  describe('GET & POST login as regular', () => {
+
+    const agent = chai.request.agent(app);
+    const loginAttempt = (userId, password) =>
+      agent
+        .post(`/users/${userId}/login`)
+        .query({ password });
+
+    let sessionUserId = -1;
+
+    it('should reject bad password', () => {
+      return loginAttempt(3, 'regular-broken_password')
+        .then(res => {
+          res.should.have.status(404);
+        });
+    });
+
+    it('should login', () => {
+      return loginAttempt(3, 'regular-pass')
+        .then(res => {
+          res.should.have.status(200);
+          expect(res.body).to.have.property('id').that.is.a('number');
+          sessionUserId = res.body.id;
+        });
+    });
+
+    it('should access own data', () => {
+      return agent
+        .get(`/users/${sessionUserId}`)
+        .then(res => {
+          res.should.have.status(200);
+          expect(res.body).to.have.property('id').that.is.a('number');
+          expect(res.body.id).to.be.equal(sessionUserId);
+        });
+    });
+
+    it('should access same company worker data', () => {
+      return agent
+        .get(`/users/2`)
+        .then(res => {
+          res.should.have.status(200);
+          expect(res.body).to.have.property('id').that.is.a('number');
+          expect(res.body.id).to.be.equal(2);
+        });
+    });
+
+    it('should reject from editing other workers data', () => {
+      return agent
+        .put(`/users/2`)
+        .send({
+          name: 'Changed name'
+        })
+        .then(res => {
+          res.should.have.status(401);
+        });
+    });
+
+    it('should reject accessing data of other company`s user', () => {
+      return agent
+        .get(`/users/1`)
+        .then(res => {
+          res.should.have.status(401);
+        });
+    });
+  });
+
 });

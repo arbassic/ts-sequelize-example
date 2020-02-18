@@ -38,15 +38,15 @@ const addSeed = async () => {
     name: UserPrivilegeTypes.manager
   });
 
-  passwordHash = await bcrypt.hash('worker-pass', 10);
-  const worker: User = await User.create({
+  passwordHash = await bcrypt.hash('regular-pass', 10);
+  const regular: User = await User.create({
     name: 'Worker',
     passwordHash,
     companyId: company.id
   });
 
   await UserPrivilege.create({
-    userId: worker.id,
+    userId: regular.id,
     name: UserPrivilegeTypes.regular // this shouldn't be necessary
   });
 

@@ -8,7 +8,7 @@ import * as helmet from 'helmet';
 import { accessLogger, logger } from './logger';
 import { db } from './db';
 import './models/associations';
-import { usersRouter } from './routes/users';
+import { usersRouter } from './routes/users-router';
 import * as swaggerUi from 'swagger-ui-express';
 
 // create express application and

@@ -4,7 +4,7 @@ import { UserPrivilegeTypes } from "models/UserPrivilege";
 import { User } from "models/User";
 import env from "env";
 
-const checkAuthUserManagement = asyncHandler(async (req, res, next: NextFunction) => {
+const checkAuthUserSameCompany = asyncHandler(async (req, res, next: NextFunction) => {
 
   const userId = req.params.userId || req.query.userId;
   if (!req.params.userId) {
@@ -18,7 +18,7 @@ const checkAuthUserManagement = asyncHandler(async (req, res, next: NextFunction
   
   let authed = req.session.privileges.includes(UserPrivilegeTypes.superadmin);
   let userCompanyId: number;
-  if (!authed && req.session.privileges.includes(UserPrivilegeTypes.manager)) {
+  if (!authed) {
 
     if (!req.session.companyId) {
       return res.status(401).json({ message: `Session has no company` });
@@ -45,7 +45,7 @@ const checkAuthUserManagement = asyncHandler(async (req, res, next: NextFunction
     if (!env.isProd) {
       output.userCompanyId = userCompanyId;
       output.hasCompanyId = req.session.companyId;
-      output.has = req.session.privileges;
+      output.hasPrivileges = req.session.privileges;
     }
     res.status(401).json(output);
     return;
@@ -54,4 +54,4 @@ const checkAuthUserManagement = asyncHandler(async (req, res, next: NextFunction
   next();
 });
 
-export { checkAuthUserManagement };
+export { checkAuthUserSameCompany };

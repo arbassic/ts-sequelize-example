@@ -4,12 +4,9 @@ import { User } from "models/User";
 import { checkAuthLevel, checkAuthParamMatch } from "middlewares/check-auth";
 import { UserPrivilegeTypes } from "models/UserPrivilege";
 import env from "env";
-import { checkAuthUserManagement } from "middlewares/check-auth-users";
+import { checkAuthUserSameCompany } from "middlewares/check-auth-users";
 
 const usersRouter = Router();
-const UserSessionParams = {
-  userId: 'userId'
-};
 
 usersRouter
   .get('/', asyncHandler(async (req, res) => {
@@ -61,23 +58,34 @@ const getUserById = asyncHandler(async (req, res) => {
 
 });
 
+// each user of a company can access data about co-workers
 usersRouter.get(
   '/:userId',
-  checkAuthLevel(UserPrivilegeTypes.manager),
-  checkAuthUserManagement,
+  checkAuthUserSameCompany,
   getUserById);
 
-usersRouter.get(
+// each user can edit its own data
+usersRouter.put(
   '/:userId',
-  checkAuthParamMatch(UserSessionParams.userId, UserSessionParams.userId),
-  getUserById);
+  checkAuthParamMatch('userId'),
+  (req, res) => {
+    // TODO
+    res.status(200).json(req.body);
+  });
+
+// manager can edit user data within the same company
+usersRouter.put(
+  '/:userId',
+  checkAuthLevel(UserPrivilegeTypes.manager),
+  checkAuthUserSameCompany,
+  (req, res) => {
+    // TODO
+    res.status(200).json(req.body);
+  });
+
 
 const sendError = (res: Response, message: string, statusCode: number = 404) => {
   res.status(statusCode).json({ message });
 };
 
-
-
-
-
-export { usersRouter, UserSessionParams };
+export { usersRouter };
