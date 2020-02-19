@@ -7,12 +7,12 @@
         "target": "es6",
         "baseUrl": "./src",
         "paths": {
-            "*": ["*", "/*", "/src/*"],
+            "*": ["*", "src/*"]
         },
         "outDir": "dist"
     },
     "include": [
-        "./src/**/*"
+        "src/**/*"
     ],
     "exclude": [
         "node_modules"
