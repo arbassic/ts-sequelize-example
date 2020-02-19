@@ -59,6 +59,11 @@ const getUserById = asyncHandler(async (req, res) => {
   res.status(200).json(user);
 });
 
+// TODO:
+// authorization middlewares need refactoring
+// - some endpoints should combine several ways of authorization
+//   i.e. editUser may be acccessed by the user itself and by the same company manager
+// - all endpoints should be allowed for superadmin by default
 
 // each user of a company can access data about co-workers
 usersRouter.get(
