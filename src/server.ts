@@ -1,5 +1,6 @@
 import env from 'env';
 import * as fs from 'fs';
+import * as ms from 'ms';
 import * as express from 'express';
 import { Request, Response } from 'express';
 import * as Session from 'express-session';
@@ -23,17 +24,18 @@ app.use(accessLogger);
 
 // configure session store and middleware
 const SequelizeStore = SessionStore(Session.Store);
-const sessionConfig: any = {
-  secret: process.env.SESSION_SECRET,
+const sessionConfig: Session.SessionOptions = {
+  secret: env.SESSION_SECRET,
   store: new SequelizeStore({ db }),
   saveUninitialized: true,
   resave: false,
   cookie: {
     httpOnly: true,
-    maxAge: parseInt(process.env.SESSION_MAX_AGE_DAYS) * 24 * 60 * 60 * 1000
+    maxAge: ms(`${env.SESSION_MAX_AGE_DAYS}d`)
   },
 };
 if (env.isProd) {
+  // TODO: these will need some edit before launching production
   app.set('trust proxy', 1);
   sessionConfig.cookie.secure = true;
   sessionConfig.proxy = true;
@@ -48,11 +50,16 @@ app.all('/', (req, res) => {
 
 // configure swagger
 app.use('/api-docs', swaggerUi.serve);
-const swaggerDocument = JSON.parse(fs.readFileSync(__dirname + '/../swagger.json', 'utf8'));
+const swaggerDocument = JSON.parse(
+  fs.readFileSync(__dirname + '/../swagger.json', 'utf8')
+);
 app.get('/api-docs', swaggerUi.setup(swaggerDocument, { explorer: true }));
 
 // configure sub-routes
 app.use('/users', usersRouter);
+
+
+
 
 // configure the "Not found" response 
 // and final error handling
