@@ -76,7 +76,13 @@ app.use((err, req: Request, res: Response, next) => {
 
     res.json(output);
   }
-  logger.error({ path: req.path, output: err.output, message: err.message, stack: err.stack, statusCode: res.statusCode });
+  logger.error(err.message || 'Got server error', {
+    path: req.path,
+    output: err.output,
+    message: err.message,
+    stack: err.stack,
+    statusCode: res.statusCode
+  });
 
 });
 
@@ -86,14 +92,21 @@ app.listen(env.APP_PORT, () => {
   logger.info(`App listening on port ${env.APP_PORT}`);
   
   // from now on express app is running
-  // capture uncaught errors and unhandled promises
+  // in production mode: capture uncaught errors and unhandled promises
+  // otherwise: let the errors stop the app
   if (env.isProd) {
     process
       .on('uncaughtException', err => {
-        logger.error('got uncaughtException', err.stack);
+        logger.error('got uncaughtException', {
+          error: err.message,
+          stack: err.stack
+        });
       })
       .on('unhandledRejection', (reason, promise) => {
-        logger.error('got unhandledRejection', reason, promise);
+        logger.error('got unhandledRejection', {
+          reason,
+          promise
+        });
       });
   }
 });
