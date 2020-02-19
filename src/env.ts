@@ -4,7 +4,7 @@ if (result.error) throw Error("Missing .env file");
 
 const env = {
   NODE_ENV: process.env.NODE_ENV,
-  PORT: process.env.PORT,
+  APP_PORT: process.env.APP_PORT,
 
   DB_DATABASE: process.env.DB_DATABASE,
   DB_USERNAME: process.env.DB_USERNAME,

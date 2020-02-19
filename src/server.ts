@@ -81,10 +81,9 @@ app.use((err, req: Request, res: Response, next) => {
 });
 
 
-// everything is set up
-// listen on a given port
-app.listen(process.env.PORT, () => {
-  logger.info(`App listening on port ${process.env.PORT}`);
+// listen at a given port
+app.listen(env.APP_PORT, () => {
+  logger.info(`App listening on port ${env.APP_PORT}`);
   
   // from now on express app is running
   // capture uncaught errors and unhandled promises

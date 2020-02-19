@@ -6,7 +6,7 @@ chai.use(chaiHttp);
 chai.should();
 
 
-const app = `http://localhost:${env.PORT}`;
+const app = `http://localhost:${env.APP_PORT}`;
 // import app from '../src/server';
 // before((done) => {
 //   app.on('app launched', (user: any) => {
