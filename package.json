@@ -6,7 +6,7 @@
   "author": "arbassic <arbassic@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node src/server.ts",
+    "start": "NODE_PATH=src ts-node src/server.ts",
     "dev": "NODE_PATH=src nodemon --watch 'src/**/*.ts' --watch .env --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/server.ts",
     "build": "NODE_PATH=./src npx tsc -p .",
     "start-dist": "NODE_PATH=dist node dist/server.js",
@@ -40,6 +40,6 @@
     "@types/mocha": "^7.0.1",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
-    "mocha": "^7.0.1"
+    "mocha": "^7.1.2"
   }
 }
